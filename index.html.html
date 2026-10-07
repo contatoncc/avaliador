@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><script src="https://myhub.ia.br/canvas-vendor/tailwind.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TWA Avaliador Imobiliário</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--tx:#1d2330;--mut:#5d6675;--bd:#d5d9e0;--pri:#1f4e79;--pri2:#e6eef7;--ok:#1e7b3a;--warn:#a15c00;--bad:#b3261e;--in:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#14171c;--card:#1d2128;--tx:#e4e7ec;--mut:#9aa3b2;--bd:#343a45;--pri:#6ea8e0;--pri2:#24303f;--ok:#5cc27d;--warn:#e0a24a;--bad:#ef6b62;--in:#252a33}}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:var(--card);border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+header h1{font-size:16px;margin:0}
+header small{color:var(--mut);display:block;font-weight:400}
+header select{width:auto}
+button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:6px;padding:6px 12px;cursor:pointer}
+button.pri{background:var(--pri);color:#fff;border-color:var(--pri)}
+button.danger{background:var(--bad);color:#fff;border-color:var(--bad)}
+.banner{background:#fff4d6;color:#5a4300;padding:8px 16px;border-bottom:1px solid #e8d48f;font-size:13px}
+@media (prefers-color-scheme:dark){.banner{background:#3a3115;color:#f1dc9a;border-color:#5b4c1f}}
+.tabs{display:flex;gap:4px;padding:8px 16px 0;background:var(--bg)}
+.tabs button{border-radius:6px 6px 0 0;border-bottom:none;background:transparent;color:var(--mut)}
+.tabs button.on{background:var(--card);color:var(--tx);font-weight:600;border-color:var(--bd)}
+.wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;padding:0 16px 16px}
+main{min-width:0}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:14px;margin-top:12px}
+.card h2{font-size:14px;margin:0 0 10px;color:var(--pri);text-transform:uppercase;letter-spacing:.03em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mut);gap:3px}
+label.full{grid-column:1/-1}
+label.ck{flex-direction:row;align-items:center;gap:6px;font-size:13px;color:var(--tx)}
+input,select,textarea{font:inherit;font-size:14px;color:var(--tx);background:var(--in);border:1px solid var(--bd);border-radius:5px;padding:6px 7px;width:100%}
+textarea{min-height:70px;resize:vertical}
+input[type=checkbox]{width:auto}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--bd);padding:5px 6px;text-align:left;white-space:nowrap}
+th{background:var(--card);position:sticky;top:0;color:var(--mut);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+#amTab input,#amTab select{padding:4px 5px;font-size:12.5px}
+#amTab input.w1{width:160px}#amTab input.w2{width:110px}#amTab input.w3{width:64px}#amTab input.wd{width:135px}#amTab select.wc{width:190px}
+.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11.5px;font-weight:600}
+.c-u{background:#dcefe2;color:#1e5e30}.c-s{background:#fde3d9;color:#8c2a12}.c-e{background:#e5e7eb;color:#4b5563}.c-f{background:#fff0c2;color:#7a5600}
+.muted{color:var(--mut);font-size:12.5px}
+.alert{border-left:4px solid var(--warn);background:var(--pri2);padding:6px 9px;border-radius:4px;margin:6px 0;font-size:12.5px}
+.alert.bad{border-color:var(--bad)}.alert.ok{border-color:var(--ok)}
+aside{position:sticky;top:10px;align-self:start}
+.big{font-size:28px;font-weight:700;color:var(--pri);margin:4px 0}
+.ext{font-size:12.5px;color:var(--mut);font-style:italic}
+.bar{position:relative;height:22px;background:var(--pri2);border:1px solid var(--bd);border-radius:4px;margin:18px 0 22px}
+.bar .ic{position:absolute;top:0;bottom:0;background:var(--pri);opacity:.35}
+.bar .mk{position:absolute;top:-6px;bottom:-6px;width:3px;background:var(--bad)}
+.bar .lb{position:absolute;top:24px;font-size:10.5px;color:var(--mut);white-space:nowrap}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kp div{border:1px solid var(--bd);border-radius:6px;padding:8px}
+.kp b{display:block;font-size:22px;color:var(--pri)}
+.com{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.com div{border:1px dashed var(--bd);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--mut)}
+.com b{display:block;font-size:15px;color:var(--tx)}
+td.hit{background:var(--pri2);font-weight:700;outline:2px solid var(--pri);outline-offset:-2px}
+.mono{font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:12px;min-height:420px;white-space:pre}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+footer{padding:12px 16px 24px;color:var(--mut);font-size:12px;max-width:1100px}
+@media (max-width:600px){
+ .wrap{grid-template-columns:1fr;padding:0 10px 10px}
+ aside{position:static;order:-1}
+ .tabs{flex-wrap:wrap;padding:8px 10px 0}
+ .tabs button{flex:1 1 30%;border-radius:6px;border-bottom:1px solid var(--bd)}
+ header{padding:10px}
+}
+</style>
+</head>
+<body>
+<noscript><div style="background:#b3261e;color:#fff;padding:16px;font-size:16px;font-weight:600">Esta tela não executa o aplicativo. Você está numa pré-visualização de arquivo, que não faz cálculos. No iPhone, abra pelo link do aplicativo no Safari. No computador, abra com o Chrome, o Edge ou o Firefox.</div></noscript>
+<header>
+ <h1>TWA Avaliador Imobiliário<small>Método comparativo direto com tratamento por fatores · base técnica ABNT NBR 14653-1 e 14653-2</small></h1>
+ <div class="row"><label class="ck" style="color:var(--mut)">Documento <select id="selTipo" data-k="tipo"></select></label><button id="bEx">Carregar exemplo</button><button id="bNovo">Novo estudo</button></div>
+</header>
+<div id="banner"></div>
+<nav class="tabs" id="tabs"></nav>
+<div class="wrap"><main id="main"></main><aside id="panel"></aside></div>
+<footer>Tabelas de fundamentação e precisão conforme ABNT NBR 14653-2, aplicada em conjunto com a NBR 14653-1. Confira a edição vigente da norma. A ferramenta apoia o cálculo; a responsabilidade pela avaliação é do profissional que assina o documento.</footer>
+<script>
+"use strict";
+const KEY='twa_avaliador_v2';
+const EST=[[1,'Novo',0],[2,'Regular',0.0252],[3,'Reparos simples',0.181],[4,'Reparos importantes',0.526],[5,'Sem valor',1]];
+const CAT=['Térreo ou subsolo, sem vista','Andar baixo, fundos','Andar baixo, frente','Andar médio, sem vista','Andar médio, vista parcial','Andar alto, sem vista ou vista parcial','Andar alto, vista livre','Andar alto, vista mar'];
+const TT=[3.078,1.886,1.638,1.533,1.476,1.440,1.415,1.397,1.383,1.372,1.363,1.356,1.350,1.345,1.341,1.337,1.333,1.330,1.328,1.325,1.323,1.321,1.319,1.318,1.316,1.315,1.314,1.313,1.311,1.310];
+const TABS=['1 Identificação','2 Amostra','3 Tratamento','4 Especificação','5 Comercial','6 Documento'];
+const DOCS=[['mat','Matrícula atualizada'],['iptu','IPTU em dia'],['cond','Condomínio em dia'],['onus','Sem ônus'],['habite','Habite-se']];
+const JF=[['oferta','Fator oferta'],['area','Fator área'],['conserv','Fator conservação'],['vagas','Fator vagas'],['cat','Fator andar e vista']];
+const JDEF={oferta:'Aplicado às ofertas para refletir a margem usual de negociação entre o preço anunciado e o preço efetivamente praticado; transações concluídas mantidas com fator 1,00.',
+ area:'Imóveis maiores tendem a apresentar menor valor unitário (R$/m²). O fator de Abunahman corrige a diferença de escala em relação à área privativa do avaliando.',
+ conserv:'Ajuste da depreciação física (idade aparente e estado de conservação) pelo método de Ross-Heidecke, com a mesma vida útil referencial para avaliando e amostra.',
+ vagas:'Cada vaga de garagem agrega valor ao imóvel; adotado acréscimo de 6% por vaga, compatível com a percepção do mercado local.',
+ cat:'Andar e vista influenciam liquidez e preço; adotada escala de 8 categorias com 6% por nível, do térreo sem vista ao andar alto com vista mar.'};
+const $=s=>document.querySelector(s);
+const h=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function num(s){if(s===null||s===undefined)return NaN;if(typeof s==='number')return s;s=String(s).trim().replace(/\s|R\$/g,'');if(!s)return NaN;if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if(/^\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,'');return Number(s)}
+const fmt=(n,d=2)=>isFinite(n)?n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const brl=(n,d=2)=>isFinite(n)?'R$ '+fmt(n,d):'—';
+const pct=(n,d=1)=>isFinite(n)?fmt(n*100,d)+'%':'—';
+const ROM=['—','I','II','III'];
+function hoje(){try{return new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())}catch(e){return new Date().toISOString().slice(0,10)}}
+function addDays(iso,n){const t=Date.parse(iso+'T12:00:00Z');if(!isFinite(t))return'';return new Date(t+n*864e5).toISOString().slice(0,10)}
+const dBR=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');return m?`${m[3]}/${m[2]}/${m[1]}`:'—'};
+const catTxt=c=>c?`${c} - ${CAT[+c-1]}`:'não informado';
+
+function blank(){return{exemplo:false,tipo:'PTAM',
+ id:{solicitante:'',finalidade:'Venda',objetivo:'Valor de mercado',data:hoje(),resp:'',registro:'',empresa:'',telefone:'',cidadeEm:'',pressupostos:'',
+  endereco:'',bairro:'',cidade:'',tipologia:'Apartamento',area:'',areaFonte:'Matrícula',ano:'',idade:'',vu:'60',estado:'2',dorm:'',suites:'',vagas:'',cat:'',cond:'',iptu:'',
+  doc:{mat:false,iptu:false,cond:false,onus:false,habite:false},descricao:''},
+ dados:[],
+ trat:{fo:'0,90',comb:'soma',R:'20',san:'chauvenet',iv:['1,00','1,06','1,12','1,18','1,24','1,30','1,36'],ic:['1,00','1,06','1,12','1,18','1,24','1,30','1,36','1,42'],just:Object.assign({},JDEF)},
+ esp:{i1:'2',i3:'2',modo:'central',arbitrio:'',just:'',arred:true},
+ com:{piso:'3',anuncio:'8',validade:'90',revisao:'',tempo:'',anexo:false}}}
+function exemplo(){const s=blank(),H=hoje();s.exemplo=true;
+ Object.assign(s.id,{solicitante:'Exemplo — cliente fictício',resp:'Exemplo — avaliador',registro:'CRECI 000000-F · CNAI 00000',empresa:'Exemplo Imóveis',telefone:'(13) 0000-0000',cidadeEm:'Santos/SP',
+  pressupostos:'Estudo de exemplo: todos os dados (avaliando e amostra) são fictícios e servem apenas para demonstrar o funcionamento da ferramenta. Não utilizar como parecer ou laudo.',
+  endereco:'Rua Exemplo, 100, apto 52',bairro:'Bairro Exemplo',cidade:'Santos/SP',area:'85',areaFonte:'Matrícula',idade:'10',estado:'2',dorm:'2',suites:'0',vagas:'1',cat:'3',cond:'800',iptu:'2400',
+  descricao:'Apartamento fictício de 2 dormitórios, 1 vaga, andar baixo de frente, em estado regular.'});
+ Object.assign(s.id.doc,{mat:true,iptu:true,cond:true});
+ const L=[['Rua Exemplo A, 210','Imobiliária A · anúncio','Oferta',780000,88,8,2,1,6,20],['Rua Exemplo B, 45','Portal · proprietário','Oferta',720000,80,15,3,1,2,35],['Rua Exemplo C, 390','Cartório · escritura','Transação',690000,78,12,2,1,3,60],['Av. Exemplo D, 1200','Imobiliária B','Oferta',850000,95,5,1,2,6,15],['Rua Exemplo E, 77','Portal · corretor','Oferta',640000,75,20,3,1,2,90],['Av. Exemplo F, 15','Imobiliária C','Oferta',1550000,90,2,1,2,6,45],['Rua Exemplo G, 502','Imobiliária A','Oferta',760000,85,10,2,1,3,10],['Rua Exemplo H, 88','Corretor parceiro · venda','Transação',700000,82,14,2,1,2,120],['Rua Exemplo I, 260','Portal · proprietário','Oferta',810000,90,6,2,1,6,25],['Rua Exemplo J, 330','Imobiliária D · anúncio','Oferta',1500000,85,10,2,1,3,5]];
+ s.dados=L.map(r=>({usar:true,end:r[0],fonte:r[1],dataInfo:addDays(H,-r[9]),nat:r[2],valor:String(r[3]),area:String(r[4]),idade:String(r[5]),estado:String(r[6]),vagas:String(r[7]),cat:String(r[8]),foto:false}));return s}
+function novoDado(){return{usar:true,end:'',fonte:'',dataInfo:hoje(),nat:'Oferta',valor:'',area:'',idade:'',estado:'2',vagas:'',cat:'',foto:false}}
+function merge(o){const b=blank();if(!o||typeof o!=='object')return b;b.exemplo=!!o.exemplo;b.tipo=o.tipo==='Laudo'?'Laudo':'PTAM';
+ Object.assign(b.id,o.id||{});b.id.doc=Object.assign(blank().id.doc,(o.id&&o.id.doc)||{});Object.assign(b.esp,o.esp||{});Object.assign(b.com,o.com||{});
+ if(o.trat){Object.assign(b.trat,o.trat);b.trat.just=Object.assign({},JDEF,o.trat.just||{});if(!Array.isArray(o.trat.iv)||o.trat.iv.length!==7)b.trat.iv=blank().trat.iv;if(!Array.isArray(o.trat.ic)||o.trat.ic.length!==8)b.trat.ic=blank().trat.ic}
+ if(Array.isArray(o.dados))b.dados=o.dados.map(d=>Object.assign(novoDado(),d));return b}
+let S;try{const raw=localStorage.getItem(KEY);S=raw?merge(JSON.parse(raw)):exemplo()}catch(e){S=exemplo()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let tab=0;
+
+function invN(p){const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.357751867269,-30.66479806614716,2.506628277459239],b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572],c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783],d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416],pl=0.02425;let q,r;
+ if(p<pl){q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+ if(p>1-pl){q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)}
+ q=p-0.5;r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)}
+function tval(gl){if(gl<1)return NaN;if(gl<=30)return TT[gl-1];if(gl<=40)return 1.303;if(gl<=60)return 1.296;if(gl<=120)return 1.289;return 1.282}
+function stats(v){const n=v.length,m=v.reduce((a,b)=>a+b,0)/n,sd=n>1?Math.sqrt(v.reduce((a,b)=>a+(b-m)**2,0)/(n-1)):0;return{n,m,sd}}
+function idadeA(){const i=num(S.id.idade);if(isFinite(i))return i;const a=num(S.id.ano),y=+(S.id.data||hoje()).slice(0,4);return isFinite(a)&&a>1800?Math.max(0,y-a):NaN}
+
+function calc(){
+ const I=S.id,T=S.trat,Aa=num(I.area),vu=num(I.vu)>0?num(I.vu):60,R=isFinite(num(T.R))?num(T.R)/100:0.2,fo=isFinite(num(T.fo))?num(T.fo):0.9;
+ const iv=T.iv.map(num),ic=T.ic.map(num),okI=x=>isFinite(x)&&x>0,idA=idadeA();
+ const foc=(age,e)=>{let x=(isFinite(age)?age:0)/vu;x=Math.min(1,Math.max(0,x));const A=(x+x*x)/2,hh=(EST[(+e||1)-1]||EST[0])[2],k=A+(1-A)*hh;return R+(1-R)*(1-k)};
+ const focA=foc(idA,I.estado),ref=Date.parse(I.data);
+ const rows=S.dados.map((d,i)=>{const v=num(d.valor),a=num(d.area),ok=v>0&&a>0,unit=ok?v/a:NaN;
+  const fOf=d.nat==='Oferta'?fo:1;let fA=1;if(ok&&Aa>0){const r=a/Aa;fA=Math.pow(r,Math.abs(r-1)<=0.3?0.25:0.125)}
+  const fd=foc(num(d.idade),d.estado),fC=fd>0?focA/fd:1;
+  let fV=1;if(I.vagas!==''&&d.vagas!==''&&okI(iv[+I.vagas])&&okI(iv[+d.vagas]))fV=iv[+I.vagas]/iv[+d.vagas];
+  let fK=1;if(I.cat&&d.cat&&okI(ic[+I.cat-1])&&okI(ic[+d.cat-1]))fK=ic[+I.cat-1]/ic[+d.cat-1];
+  const F=[fA,fC,fV,fK],conj=T.comb==='prod'?F.reduce((x,y)=>x*y,1):1+F.reduce((x,y)=>x+(y-1),0);
+  const dt=Date.parse(d.dataInfo),velho=isFinite(ref)&&isFinite(dt)&&(ref-dt)/864e5>183;
+  return{i,d,ok,unit,fOf,fA,fC,fV,fK,conj,velho,hom:ok?unit*fOf*conj:NaN,st:!ok?'f':!d.usar?'e':'u'}});
+ let pool=rows.filter(r=>r.st==='u');const removed=[];
+ if(T.san==='chauvenet'){while(pool.length>=3){const s=stats(pool.map(r=>r.hom));if(!(s.sd>0))break;const lim=invN(1-1/(4*s.n));let mx=null,z=0;pool.forEach(r=>{const zz=Math.abs(r.hom-s.m)/s.sd;if(zz>z){z=zz;mx=r}});if(z>lim){mx.st='s';removed.push(mx);pool=pool.filter(r=>r!==mx)}else break}}
+ else if(T.san==='faixa'){while(pool.length>=3){const m=stats(pool.map(r=>r.hom)).m,out=pool.filter(r=>Math.abs(r.hom-m)>0.3*m);if(!out.length)break;out.forEach(r=>{r.st='s';removed.push(r)});pool=pool.filter(r=>!out.includes(r))}}
+ const n=pool.length;let st={n,m:NaN,sd:NaN,cv:NaN,min:NaN,max:NaN,t:NaN,li:NaN,ls:NaN,amp:NaN};
+ if(n>=1){const s=stats(pool.map(r=>r.hom));st.m=s.m;st.sd=s.sd;st.cv=s.m?s.sd/s.m:NaN;st.min=Math.min(...pool.map(r=>r.hom));st.max=Math.max(...pool.map(r=>r.hom));
+  if(n>=2){st.t=tval(n-1);const e=st.t*s.sd/Math.sqrt(n);st.li=s.m-e;st.ls=s.m+e;st.amp=2*e/s.m}}
+ const i2=n>=12?3:n>=5?2:n>=3?1:0;let i4=0;if(n>0){const c=pool.map(r=>r.conj),mn=Math.min(...c),mx=Math.max(...c);i4=(mn>=0.8&&mx<=1.25)?3:(mn>=0.5&&mx<=2)?2:(mn>=0.4&&mx<=2.5)?1:0}
+ const i1=+S.esp.i1,i3=+S.esp.i3,pts=i1+i2+i3+i4;let fund=0;
+ if(n>=3){if(pts>=10&&i2===3&&i4===3&&i1>=2&&i3>=2)fund=3;else if(pts>=6&&i2>=2&&i4>=2&&i1>=1&&i3>=1)fund=2;else if(pts>=4&&Math.min(i1,i2,i3,i4)>=1)fund=1}
+ let prec=0;if(n>=3&&isFinite(st.amp))prec=st.amp<=0.3?3:st.amp<=0.4?2:st.amp<=0.5?1:0;
+ const central=n>=1&&Aa>0?st.m*Aa:NaN;let base=central,arbOut=false,usaArb=false;
+ if(S.esp.modo==='arbitrio'){const v=num(S.esp.arbitrio);if(v>0){base=v;usaArb=true;arbOut=isFinite(central)&&(v<central*0.85||v>central*1.15)}}
+ let adot=base,arr=false;if(S.esp.arred&&isFinite(base)&&base>0){const step=base<100000?100:base<=1000000?1000:10000,r=Math.round(base/step)*step;if(Math.abs(r-base)/base<=0.01&&r!==base){adot=r;arr=true}}
+ const pP=isFinite(num(S.com.piso))?num(S.com.piso):3,pA=isFinite(num(S.com.anuncio))?num(S.com.anuncio):8;
+ const piso=adot*(1-pP/100),anuncio=adot*(1+pA/100);
+ const ofs=rows.filter(r=>r.ok&&r.d.usar&&r.d.nat==='Oferta').map(r=>r.unit),mOf=ofs.length?ofs.reduce((a,b)=>a+b,0)/ofs.length:NaN;
+ const validade=num(S.com.validade)>0?num(S.com.validade):90,revisao=S.com.revisao||addDays(I.data,60);
+ const noIdx=[...iv.map((x,k)=>!okI(x)?'vagas '+k:null),...ic.map((x,k)=>!okI(x)?'categoria '+(k+1):null)].filter(Boolean);
+ const justVaz=JF.filter(([k])=>!String(S.trat.just[k]||'').trim()).length;
+ return{rows,pool,removed,st,i1,i2,i3,i4,pts,fund,prec,central,base,adot,arr,usaArb,arbOut,Aa,fo,vu,R,iv,ic,noIdx,idA,piso,anuncio,pP,pA,mOf,validade,revisao,justVaz,
+  velhos:rows.filter(r=>r.velho).length,semVag:rows.filter(r=>r.d.vagas==='').length,semCat:rows.filter(r=>!r.d.cat).length,
+  nOf:S.dados.filter(d=>d.nat==='Oferta').length,nTr:S.dados.filter(d=>d.nat==='Transação').length}}
+
+/* extenso */
+const U=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],DZ=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'],CT=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+function g3(n){if(n===100)return'cem';const c=Math.floor(n/100),r=n%100,p=[];if(c)p.push(CT[c]);if(r<20){if(r)p.push(U[r])}else{p.push(DZ[Math.floor(r/10)]);if(r%10)p.push(U[r%10])}return p.join(' e ')}
+function inteiro(n){if(n===0)return'zero';const g=[];while(n>0){g.push(n%1000);n=Math.floor(n/1000)}const sc=[['',''],['mil','mil'],['milhão','milhões'],['bilhão','bilhões']],p=[];
+ for(let i=g.length-1;i>=0;i--){const v=g[i];if(!v)continue;let s=i===0?g3(v):i===1?(v===1?'mil':g3(v)+' mil'):g3(v)+' '+(v===1?sc[i][0]:sc[i][1]);p.push({s,v})}
+ let out=p[0].s;for(let k=1;k<p.length;k++)out+=(p[k].v<100||p[k].v%100===0?' e ':' ')+p[k].s;return out}
+function extenso(v){if(!isFinite(v)||v<=0)return'';const n=Math.floor(v+1e-9),c=Math.round((v-n)*100);let s='';if(n)s=inteiro(n)+(n===1?' real':(n%1000000===0?' de reais':' reais'));if(c)s+=(s?' e ':'')+inteiro(c)+(c===1?' centavo':' centavos');return s}
+
+/* UI helpers */
+const get=k=>k.split('.').reduce((o,p)=>o?.[p],S);
+function setP(k,v){const p=k.split('.');let o=S;for(let i=0;i<p.length-1;i++)o=o[p[i]];o[p[p.length-1]]=v}
+const inp=(l,k,o={})=>`<label class="${o.full?'full':''}">${l}<input data-k="${k}" type="${o.date?'date':'text'}" ${o.num?'inputmode="decimal"':''} value="${h(get(k))}" placeholder="${h(o.ph||'')}"></label>`;
+const sel=(l,k,opts,full)=>`<label class="${full?'full':''}">${l}<select data-k="${k}">${opts.map(([v,t])=>`<option value="${h(v)}"${String(get(k))===String(v)?' selected':''}>${h(t)}</option>`).join('')}</select></label>`;
+const ta=(l,k)=>`<label class="full">${l}<textarea data-k="${k}">${h(get(k))}</textarea></label>`;
+const ck=(l,k)=>`<label class="ck"><input type="checkbox" data-k="${k}"${get(k)?' checked':''}> ${l}</label>`;
+const o1=a=>a.map(x=>[x,x]);
+const estOpts=EST.map(e=>[String(e[0]),`${e[0]} ${e[1]} (${fmt(e[2],e[2]===0||e[2]===1?0:e[2]<0.1?4:3)})`]);
+const vagOpts=[0,1,2,3,4,5,6].map(v=>[String(v),String(v)]);
+const catOpts=[['','—'],...CAT.map((t,i)=>[String(i+1),`${i+1} ${t}`])];
+const opt=(arr,v)=>arr.map(([a,b])=>`<option value="${h(a)}"${String(v)===String(a)?' selected':''}>${h(b)}</option>`).join('');
+const chip=s=>({u:'<span class="chip c-u">Usado</span>',s:'<span class="chip c-s">Saneado</span>',e:'<span class="chip c-e">Excluído</span>',f:'<span class="chip c-f">Falta valor ou área</span>'}[s]);
+
+function renderTabs(){$('#tabs').innerHTML=TABS.map((t,i)=>`<button class="${i===tab?'on':''}" data-tab="${i}">${t}</button>`).join('');
+ $('#selTipo').innerHTML=opt([['PTAM','PTAM (corretor)'],['Laudo','Laudo NBR 14653']],S.tipo);
+ $('#banner').innerHTML=S.exemplo?'<div class="banner">Você está vendo um estudo de exemplo com dados fictícios. Use “Novo estudo” para começar o seu.</div>':''}
+
+function vTab1(){const ia=idadeA();return`<div class="card"><h2>Trabalho avaliatório</h2><div class="grid">
+ ${inp('Solicitante','id.solicitante')}
+ ${sel('Finalidade','id.finalidade',o1(['Venda','Compra','Locação','Garantia','Partilha/inventário','Seguro','Judicial','Outra']))}
+ ${sel('Objetivo','id.objetivo',o1(['Valor de mercado','Valor de liquidação forçada','Valor em risco']))}
+ ${inp('Data de referência','id.data',{date:1})}
+ ${inp('Responsável','id.resp')}
+ ${inp('Registro (CRECI + CNAI, ou CREA/CAU)','id.registro')}
+ ${inp('Empresa/rede','id.empresa')}
+ ${inp('Telefone','id.telefone')}
+ ${inp('Cidade de emissão','id.cidadeEm')}
+ ${ta('Pressupostos, ressalvas e fatores limitantes','id.pressupostos')}
+ </div></div>
+ <div class="card"><h2>Imóvel avaliando</h2><div class="grid">
+ ${inp('Endereço','id.endereco',{full:1})}
+ ${inp('Bairro','id.bairro')}
+ ${inp('Cidade/UF','id.cidade')}
+ ${sel('Tipologia','id.tipologia',o1(['Apartamento','Casa','Sala comercial','Loja','Terreno','Galpão']))}
+ ${inp('Área privativa (m²)','id.area',{num:1})}
+ ${sel('Área confirmada em','id.areaFonte',o1(['Matrícula','IPTU','Planta','Medição in loco','Informada pelo proprietário']))}
+ ${inp('Ano de construção','id.ano',{num:1})}
+ ${inp('Idade aparente (anos) – prevalece','id.idade',{num:1,ph:isFinite(ia)?'calculada: '+ia:''})}
+ ${inp('Vida útil referencial (anos)','id.vu',{num:1})}
+ ${sel('Estado de conservação (Ross-Heidecke)','id.estado',estOpts)}
+ ${inp('Dormitórios','id.dorm',{num:1})}
+ ${inp('Suítes','id.suites',{num:1})}
+ ${sel('Vagas','id.vagas',[['','—'],...vagOpts])}
+ ${sel('Andar e vista','id.cat',catOpts)}
+ ${inp('Condomínio (R$/mês)','id.cond',{num:1})}
+ ${inp('IPTU (R$/ano)','id.iptu',{num:1})}
+ <div class="full"><div class="muted" style="margin-bottom:4px">Situação documental</div><div class="row">${DOCS.map(([k,t])=>ck(t,'id.doc.'+k)).join('')}</div></div>
+ ${ta('Descrição e vistoria','id.descricao')}
+ </div><p class="muted">Idade usada no cálculo: <b id="idUso">${isFinite(ia)?ia+' anos':'—'}</b>. A vida útil referencial vale para o avaliando e para todos os dados da amostra.</p></div>`}
+
+function vTab2(){const r=calc();return`<div class="card"><h2>Dados de mercado</h2>
+ <p id="amRes" class="muted">${amRes(r)}</p><div id="amW"></div>
+ <div class="tw"><table id="amTab"><thead><tr><th>#</th><th>Usar</th><th>Endereço</th><th>Fonte/contato</th><th>Data da informação</th><th>Natureza</th><th class="n">Valor (R$)</th><th class="n">Área (m²)</th><th>Vagas</th><th>Andar e vista</th><th>Idade</th><th>Conservação</th><th>Foto</th><th class="n">R$/m²</th><th class="n">R$/m² homog.</th><th>Situação</th><th></th></tr></thead><tbody>
+ ${S.dados.map((d,i)=>`<tr><td>${i+1}</td><td><input type="checkbox" data-d="${i}.usar"${d.usar?' checked':''}></td>
+ <td><input class="w1" data-d="${i}.end" value="${h(d.end)}"></td><td><input class="w1" data-d="${i}.fonte" value="${h(d.fonte)}"></td>
+ <td><input class="wd" type="date" data-d="${i}.dataInfo" value="${h(d.dataInfo)}"></td>
+ <td><select data-d="${i}.nat">${opt(o1(['Oferta','Transação']),d.nat)}</select></td>
+ <td><input class="w2" inputmode="decimal" data-d="${i}.valor" value="${h(d.valor)}"></td><td><input class="w3" inputmode="decimal" data-d="${i}.area" value="${h(d.area)}"></td>
+ <td><select data-d="${i}.vagas">${opt([['','—'],...vagOpts],d.vagas)}</select></td><td><select class="wc" data-d="${i}.cat">${opt(catOpts,d.cat)}</select></td>
+ <td><input class="w3" inputmode="decimal" data-d="${i}.idade" value="${h(d.idade)}"></td><td><select data-d="${i}.estado">${opt(estOpts,d.estado)}</select></td>
+ <td><input type="checkbox" data-d="${i}.foto"${d.foto?' checked':''}></td>
+ <td class="n" id="u${i}"></td><td class="n" id="h${i}"></td><td id="s${i}"></td><td><button data-del="${i}" title="Remover">✕</button></td></tr>`).join('')}
+ </tbody></table></div><div class="row" style="margin-top:10px"><button class="pri" id="bAdd">Adicionar dado</button></div></div>`}
+const amRes=r=>`${S.dados.length} dados · ${r.nOf} ofertas · ${r.nTr} transações · ${r.st.n} efetivamente utilizados`;
+const amW=r=>{const v=r.rows.filter(x=>x.velho).map(x=>x.i+1);return v.length?`<div class="alert">Dado(s) ${v.join(', ')} com mais de 6 meses em relação à data de referência.</div>`:''};
+
+function vTab3(){const t=S.trat;return`<div class="card"><h2>Parâmetros</h2><div class="grid">
+ ${inp('Fator oferta (só ofertas)','trat.fo',{num:1})}
+ ${sel('Combinação dos fatores','trat.comb',[['soma','Somatório: 1 + Σ(Fi − 1)'],['prod','Produto: Π Fi']])}
+ ${inp('Valor residual Ross-Heidecke (%)','trat.R',{num:1})}
+ ${sel('Saneamento','trat.san',[['chauvenet','Critério de Chauvenet'],['faixa','Faixa de ±30% da média, com recálculo'],['nenhum','Sem saneamento automático']])}
+ </div><p class="muted">Transações usam fator oferta 1,00. F área (Abunahman): (Ac ÷ Aa)^(1/4) até 30% de diferença; ^(1/8) acima. F conservação: FOC(avaliando) ÷ FOC(dado), Ross-Heidecke.</p></div>
+ <div class="card"><h2>Coeficientes</h2><div class="muted" style="margin-bottom:6px">Vagas</div><div class="grid">
+ ${t.iv.map((v,k)=>`<label>${k} vaga${k===1?'':'s'}<input inputmode="decimal" data-iv="${k}" value="${h(v)}"></label>`).join('')}
+ </div><div class="muted" style="margin:12px 0 6px">Andar e vista</div><div class="grid">
+ ${t.ic.map((v,k)=>`<label>${k+1} ${CAT[k]}<input inputmode="decimal" data-ic="${k}" value="${h(v)}"></label>`).join('')}
+ </div><div id="coefW"></div></div>
+ <div class="card"><h2>Justificativa dos ajustes</h2><div class="grid">${JF.map(([k,l])=>ta(l,'trat.just.'+k)).join('')}</div></div>
+ <div id="tratLive"></div>`}
+function coefW(r){const a=[],eq=v=>v.every(x=>x===v[0]);
+ if(eq(r.iv))a.push('Índices de vagas todos iguais: as vagas ainda não alteram o valor.');
+ if(eq(r.ic))a.push('Índices de andar e vista todos iguais: o andar e a vista ainda não alteram o valor.');
+ if(S.id.vagas==='')a.push('Avaliando sem vagas informadas: F vagas = 1,00 para todos os dados.');
+ if(!S.id.cat)a.push('Avaliando sem andar e vista informados: F andar/vista = 1,00 para todos os dados.');
+ if(r.semVag)a.push(`${r.semVag} dado(s) sem vagas: ficam com fator 1,00.`);
+ if(r.semCat)a.push(`${r.semCat} dado(s) sem andar e vista: ficam com fator 1,00.`);
+ if(r.noIdx.length)a.push('Índice vazio ou zero ('+r.noIdx.join(', ')+'): o fator correspondente fica 1,00.');
+ return a.map(x=>`<div class="alert">${x}</div>`).join('')}
+const sanMsg=x=>S.trat.san==='faixa'?`Dado ${x.i+1} (R$ ${fmt(x.hom,0)}/m²) removido por estar fora da faixa de ±30% da média.`:`Dado ${x.i+1} (R$ ${fmt(x.hom,0)}/m²) removido pelo critério de Chauvenet.`;
+function tratLive(r){const s=r.st;
+ const tb=`<div class="card"><h2>Homogeneização</h2><div class="tw"><table><thead><tr><th>#</th><th class="n">R$/m²</th><th class="n">F oferta</th><th class="n">F área</th><th class="n">F conserv.</th><th class="n">F vagas</th><th class="n">F andar/vista</th><th class="n">Conjunto</th><th class="n">R$/m² homog.</th><th>Situação</th></tr></thead><tbody>
+ ${r.rows.map(x=>`<tr><td>${x.i+1}</td><td class="n">${fmt(x.unit)}</td><td class="n">${fmt(x.fOf,4)}</td><td class="n">${fmt(x.fA,4)}</td><td class="n">${fmt(x.fC,4)}</td><td class="n">${fmt(x.fV,4)}</td><td class="n">${fmt(x.fK,4)}</td><td class="n">${fmt(x.conj,4)}</td><td class="n">${fmt(x.hom)}</td><td>${chip(x.st)}</td></tr>`).join('')}
+ </tbody></table></div></div>`;
+ let san='';if(S.trat.san==='nenhum')san='<p>Saneamento automático desativado; exclusões apenas por decisão do avaliador.</p>';
+ else if(r.rows.filter(x=>x.ok&&x.d.usar).length<3)san='<div class="alert bad">São necessários ao menos 3 dados para sanear e enquadrar o laudo.</div>';
+ else san=r.removed.map(x=>`<p>${sanMsg(x)}</p>`).join('')+`<p>Amostra final: n = ${s.n}. ${S.trat.san==='faixa'?'Nenhum dado restante está fora da faixa de ±30% da média.':'Nenhum dado restante é discrepante pelo critério de Chauvenet.'}</p>`;
+ const L=[['Dados utilizados',`${s.n} de ${S.dados.length}`],['Média homogeneizada',brl(s.m)+'/m²'],['Desvio padrão',brl(s.sd)+'/m²'],['Coeficiente de variação',pct(s.cv)],['Mínimo',brl(s.min)],['Máximo',brl(s.max)],['t de Student (80%, '+(s.n-1)+' gl)',fmt(s.t,3)],['IC 80% inferior',brl(s.li)+'/m²'],['IC 80% superior',brl(s.ls)+'/m²'],['Amplitude do IC',pct(s.amp)]];
+ return tb+`<div class="card"><h2>Saneamento da amostra</h2>${san}</div><div class="card"><h2>Estatística da amostra saneada</h2><table><tbody>${L.map(([a,b])=>`<tr><td>${a}</td><td class="n">${b}</td></tr>`).join('')}</tbody></table></div>`}
+
+const IT=[['1','Caracterização do imóvel avaliando','Completa quanto a todos os fatores analisados','Completa quanto aos fatores utilizados no tratamento','Adoção de situação paradigma'],
+ ['2','Quantidade mínima de dados efetivamente utilizados','≥ 12','≥ 5','≥ 3'],
+ ['3','Identificação dos dados de mercado','Todas as características analisadas, com foto e observadas pelo autor','Todas as características analisadas','Apenas as características dos fatores utilizados'],
+ ['4','Intervalo admissível do conjunto de fatores','0,80 a 1,25','0,50 a 2,00','0,40 a 2,50']];
+function vTab4(){const g=[['3','III'],['2','II'],['1','I']];return`<div class="card"><h2>Escolhas do avaliador</h2><div class="grid">
+ ${sel('Item 1 – Caracterização do avaliando','esp.i1',g.map(([v,t],k)=>[v,t+' – '+IT[0][2+k]]),1)}
+ ${sel('Item 3 – Identificação dos dados','esp.i3',g.map(([v,t],k)=>[v,t+' – '+IT[2][2+k]]),1)}
+ </div></div><div id="espLive"></div>
+ <div class="card"><h2>Valor adotado</h2><div class="grid">
+ ${sel('Valor adotado','esp.modo',[['central','Estimativa central'],['arbitrio','Valor no campo de arbítrio']])}
+ ${inp('Valor no campo de arbítrio (R$)','esp.arbitrio',{num:1})}
+ <div class="full">${ck('Arredondar (até 1%)','esp.arred')}</div>
+ ${ta('Justificativa do valor no campo de arbítrio','esp.just')}
+ </div><div id="valW"></div></div>`}
+function espLive(r){const v=[r.i1,r.i2,r.i3,r.i4];
+ return`<div class="card"><h2>Grau de fundamentação – tratamento por fatores</h2><div class="tw"><table><thead><tr><th>Item</th><th>Descrição</th><th>III (3)</th><th>II (2)</th><th>I (1)</th><th class="n">Pontos</th></tr></thead><tbody>
+ ${IT.map((it,k)=>`<tr><td>${it[0]}</td><td style="white-space:normal">${it[1]}</td>${[3,2,1].map((g,j)=>`<td style="white-space:normal" class="${v[k]===g?'hit':''}">${it[2+j]}</td>`).join('')}<td class="n">${v[k]}</td></tr>`).join('')}
+ <tr><td></td><td><b>Total</b></td><td colspan="3">Enquadramento: <b>${r.fund?'Grau '+ROM[r.fund]:'Não enquadrado'}</b></td><td class="n"><b>${r.pts}</b></td></tr></tbody></table></div>
+ <p class="muted">Grau III: ≥ 10 pontos, itens 2 e 4 no III e demais ≥ II · Grau II: ≥ 6 pontos, itens 2 e 4 ≥ II e demais ≥ I · Grau I: ≥ 4 pontos, todos ≥ I.</p></div>
+ <div class="card"><h2>Grau de precisão</h2><table><thead><tr><th>Amplitude do IC 80%</th><th class="${r.prec===3?'hit':''}">III ≤ 30%</th><th class="${r.prec===2?'hit':''}">II ≤ 40%</th><th class="${r.prec===1?'hit':''}">I ≤ 50%</th></tr></thead><tbody><tr><td>${pct(r.st.amp)}</td><td colspan="3">Resultado: <b>${r.prec?'Grau '+ROM[r.prec]:'Não enquadrado'}</b></td></tr></tbody></table></div>`}
+function valW(r){let o=`<div class="alert ok">Estimativa central: <b>${brl(r.central)}</b> · Campo de arbítrio (±15%): ${brl(r.central*0.85)} a ${brl(r.central*1.15)}</div>`;
+ if(S.esp.modo==='arbitrio'){if(!(num(S.esp.arbitrio)>0))o+='<div class="alert">Informe o valor escolhido no campo de arbítrio.</div>';if(r.arbOut)o+='<div class="alert bad">O valor escolhido está fora do campo de arbítrio (±15% da estimativa central).</div>';if(!S.esp.just.trim())o+='<div class="alert bad">Justificativa obrigatória para valor no campo de arbítrio.</div>'}
+ if(r.arr)o+=`<div class="alert ok">Arredondado de ${brl(r.base)} para ${brl(r.adot)}.</div>`;return o}
+
+function vTab5(){return`<div class="card"><h2>Estratégia comercial</h2><div class="grid">
+ ${inp('Piso de negociação (− %)','com.piso',{num:1})}
+ ${inp('Preço de anúncio sugerido (+ %)','com.anuncio',{num:1})}
+ ${inp('Validade do parecer (dias)','com.validade',{num:1})}
+ ${inp('Revisão recomendada (vazio = referência + 60 dias)','com.revisao',{date:1})}
+ ${inp('Tempo estimado de venda','com.tempo',{full:1,ph:'ex.: 60 a 120 dias'})}
+ <div class="full">${ck('Incluir anexo “Estratégia comercial” no Laudo NBR','com.anexo')}</div>
+ </div><div class="alert">Os valores comerciais não fazem parte do laudo NBR. Aparecem só no PTAM, ou no anexo “Estratégia comercial” do laudo, se essa opção estiver marcada.</div></div><div id="comLive"></div>`}
+function comLive(r){const c=num(S.id.cond),L=[['Valor adotado',brl(r.adot,0)],[`Piso de negociação (−${fmt(r.pP,1)}%)`,brl(r.piso,0)],[`Preço de anúncio (+${fmt(r.pA,1)}%)`,brl(r.anuncio,0)],['Validade',fmt(r.validade,0)+' dias'],['Revisão recomendada',dBR(r.revisao)],['Condomínio por m²',isFinite(c)&&r.Aa>0?brl(c/r.Aa)+'/m²':'—'],['Valor adotado ÷ média bruta das ofertas (R$/m²)',isFinite(r.mOf)&&r.Aa>0?pct(r.adot/r.Aa/r.mOf):'—'],['Tempo estimado de venda',S.com.tempo||'—']];
+ return`<div class="card"><h2>Indicadores</h2><table><tbody>${L.map(([a,b])=>`<tr><td>${a}</td><td class="n">${h(b)}</td></tr>`).join('')}</tbody></table></div>`}
+
+function vTab6(){return`<div class="card"><h2>${S.tipo==='PTAM'?'PTAM':'Laudo NBR 14653'} – texto gerado</h2><textarea id="laudoTx" class="mono" readonly></textarea>
+ <div class="row" style="margin-top:10px"><button class="pri" id="bPdf">Gerar PDF</button><button id="bCopy">Copiar texto</button><span id="msg5" class="muted"></span></div></div>
+ <div class="card"><h2>Guardar ou transferir o estudo</h2><div class="row"><button id="bJson">Copiar dados do estudo</button><button id="bImp">Importar dados colados</button><span id="msgJ" class="muted"></span></div>
+ <textarea id="impTx" style="margin-top:8px" placeholder="Cole aqui os dados copiados (JSON) e clique em “Importar dados colados”."></textarea></div>`}
+
+function panel(r){const s=r.st,A=r.Aa,c=r.central,adot=r.adot;let bar='';
+ if(isFinite(c)&&c>0&&isFinite(s.li)){const lo=c*0.85,hi=c*1.15,P=v=>Math.min(100,Math.max(0,(v-lo)/(hi-lo)*100));
+  bar=`<div class="bar"><div class="ic" style="left:${P(s.li*A)}%;width:${P(s.ls*A)-P(s.li*A)}%"></div><div class="mk" style="left:calc(${P(adot)}% - 1px)"></div>
+  <span class="lb" style="left:0">${fmt(lo/1000,0)} mil</span><span class="lb" style="right:0">${fmt(hi/1000,0)} mil</span></div>
+  <div class="muted">Faixa: campo de arbítrio (±15%) · Sombreado: IC 80% (${fmt(s.li*A,0)} a ${fmt(s.ls*A,0)}) · Traço: valor adotado</div>`}
+ const al=[];if(s.n<3)al.push(['bad','Menos de 3 dados utilizados: não é possível enquadrar o laudo.']);
+ else{if(!r.fund)al.push(['bad','Fundamentação abaixo do grau I.']);if(s.n<5)al.push(['','Menos de 5 dados: item 2 no grau I.'])}
+ if(r.pool.some(x=>x.conj<0.8||x.conj>1.25))al.push(['','Algum conjunto de fatores fora de 0,80–1,25.']);
+ if(r.removed.length)al.push(['',`${r.removed.length} dado(s) saneado(s).`]);
+ if(r.justVaz)al.push(['',`${r.justVaz} justificativa(s) de ajuste vazia(s).`]);
+ if(r.velhos)al.push(['',`${r.velhos} dado(s) com mais de 6 meses.`]);
+ if(r.arbOut)al.push(['bad','Valor adotado fora do campo de arbítrio.']);
+ $('#panel').innerHTML=`<div class="card"><h2>${h(S.id.objetivo||'Valor de mercado')} adotado</h2><div class="big">${brl(adot,0)}</div>
+ <div class="ext">${h(extenso(adot))}</div><div class="muted" style="margin-top:6px">${brl(isFinite(adot)&&A>0?adot/A:NaN)}/m² · ${fmt(A)} m²</div>${bar}
+ <div class="com"><div>Piso (−${fmt(r.pP,1)}%)<b>${brl(r.piso,0)}</b></div><div>Anúncio (+${fmt(r.pA,1)}%)<b>${brl(r.anuncio,0)}</b></div></div>
+ <div class="kp" style="margin-top:10px"><div>Fundamentação<b>${ROM[r.fund]}</b><span class="muted">${r.pts} pontos · n = ${s.n}</span></div><div>Precisão<b>${ROM[r.prec]}</b><span class="muted">amplitude ${pct(s.amp)}</span></div></div>
+ ${al.map(([c,t])=>`<div class="alert ${c}">${t}</div>`).join('')}</div>`}
+
+/* documento */
+function documento(r){const I=S.id,s=r.st,T=S.trat,B=[],H=t=>B.push({t:'h',s:t}),P=t=>B.push({t:'p',s:t}),M=t=>B.push({t:'m',s:t}),BD=t=>B.push({t:'b',s:t}),pt=S.tipo==='PTAM';
+ const est=e=>{const x=EST[(+e||1)-1];return x[0]+' - '+x[1]};
+ const docs=DOCS.filter(([k])=>I.doc[k]).map(([,t])=>t).join(', ')||'não informada';
+ const ident=()=>{P(`Endereço: ${I.endereco||'—'}${I.bairro?', '+I.bairro:''}${I.cidade?' - '+I.cidade:''}. Tipologia: ${I.tipologia}.`);
+  P(`Área privativa: ${fmt(num(I.area))} m² (confirmada em: ${I.areaFonte}). Dormitórios: ${I.dorm||'—'} (${I.suites||'0'} suíte(s)). Vagas: ${I.vagas===''?'não informado':I.vagas}. Andar e vista: ${catTxt(I.cat)}.`);
+  P(`${I.ano?'Ano de construção: '+I.ano+'. ':''}Idade considerada: ${isFinite(r.idA)?fmt(r.idA,0):'—'} anos (vida útil referencial ${fmt(r.vu,0)} anos). Estado de conservação: ${est(I.estado)}.${I.cond?' Condomínio: '+brl(num(I.cond),0)+'/mês.':''}${I.iptu?' IPTU: '+brl(num(I.iptu),0)+'/ano.':''}`);
+  P('Situação documental: '+docs+'.');if(I.descricao)P('Descrição e vistoria: '+I.descricao)};
+ const diag=()=>P(`Foram pesquisados ${S.dados.length} dados de mercado (${r.nOf} ofertas e ${r.nTr} transações) de imóveis semelhantes na região do avaliando, dos quais ${s.n} foram efetivamente utilizados após o saneamento. A amostra saneada indica valor unitário médio homogeneizado de ${brl(s.m)}/m², com coeficiente de variação de ${pct(s.cv)}.`);
+ const metod=()=>{P('Método comparativo direto de dados de mercado, com tratamento por fatores (ABNT NBR 14653-2). Cada dado foi levado à situação do avaliando pelos fatores:');
+  P(`- Fator oferta: ${fmt(r.fo)} aplicado às ofertas; transações com 1,00.`);
+  P('- Fator área (Abunahman): (Ac / Aa)^(1/4) para diferença de área de até 30%; (Ac / Aa)^(1/8) acima disso.');
+  P(`- Fator conservação (Ross-Heidecke): FOC(avaliando) / FOC(dado), vida útil referencial ${fmt(r.vu,0)} anos, valor residual ${fmt(r.R*100,0)}%.`);
+  P('- Fator vagas: índice(avaliando) / índice(dado), com índices '+T.iv.map((v,k)=>`${k} = ${fmt(num(v))}`).join('; ')+'.');
+  P('- Fator andar e vista: índice(avaliando) / índice(dado), com índices '+T.ic.map((v,k)=>`${k+1} ${CAT[k]} = ${fmt(num(v))}`).join('; ')+'.');
+  P('- Combinação dos fatores: '+(T.comb==='prod'?'Produto: Π Fi.':'Somatório: 1 + Σ(Fi − 1).'));
+  P('- Saneamento: '+(T.san==='chauvenet'?'critério de Chauvenet, iterativo, um dado por vez.':T.san==='faixa'?'exclusão dos dados fora de ±30% da média, com recálculo iterativo.':'sem saneamento automático.'))};
+ const just=()=>JF.forEach(([k,l])=>P(`- ${l}: ${String(T.just[k]||'').trim()||'não registrada.'}`));
+ const tabela=()=>{const sitT={u:'Usado',s:'Saneado',e:'Excluído',f:'Falta valor/área'},pd=(x,n)=>String(x).padEnd(n),lp=(x,n)=>String(x).padStart(n);
+  M(pd('Dado',5)+pd('Natureza',10)+lp('Área',7)+pd('  Vg',5)+pd(' And/vista',11)+lp('R$/m²',11)+lp('Conjunto',10)+lp('R$/m² homog.',14)+'  Situação');
+  r.rows.forEach(x=>M(pd(x.i+1,5)+pd(x.d.nat,10)+lp(fmt(num(x.d.area),0),7)+pd('  '+(x.d.vagas===''?'-':x.d.vagas),5)+pd(' '+(x.d.cat||'-'),11)+lp(fmt(x.unit),11)+lp(fmt(x.conj,4),10)+lp(fmt(x.hom),14)+'  '+sitT[x.st]));
+  M('And/vista: '+CAT.map((t,k)=>(k+1)+'='+t).join('; ').slice(0,0));
+  B.pop();r.removed.forEach(x=>P(sanMsg(x).replace(/ removido/,' saneado').replace(/ \(R\$ [^)]*\)/,'')));
+  P(`Média homogeneizada: ${brl(s.m)}/m². Desvio padrão: ${brl(s.sd)}/m². Coeficiente de variação: ${pct(s.cv)}. IC 80%: ${brl(s.li)}/m² a ${brl(s.ls)}/m² (t = ${fmt(s.t,3)}, amplitude ${pct(s.amp)}).`)};
+ const espec=()=>{IT.forEach((it,k)=>{const g=[r.i1,r.i2,r.i3,r.i4][k];P(`Item ${it[0]} - ${it[1]}: grau ${ROM[g]} (${g} pontos).`)});
+  P(`Total: ${r.pts} pontos. Grau de fundamentação: ${r.fund?ROM[r.fund]:'não enquadrado'}. Grau de precisão: ${r.prec?ROM[r.prec]:'não enquadrado'} (amplitude do IC 80% de ${pct(s.amp)}).`)};
+ const result=()=>{P(`Estimativa central: ${brl(r.central)} (${brl(s.m)}/m² x ${fmt(r.Aa)} m²). Campo de arbítrio (±15%): ${brl(r.central*0.85)} a ${brl(r.central*1.15)}.`);
+  P(r.usaArb?`Valor escolhido no campo de arbítrio: ${brl(r.base)}. Justificativa: ${S.esp.just||'não informada'}.`:'Adotada a estimativa central.');
+  P(r.arr?`Arredondamento: de ${brl(r.base)} para ${brl(r.adot)} (diferença inferior a 1%).`:'Sem arredondamento.');
+  BD(`${(I.objetivo||'Valor de mercado').toUpperCase()}: ${brl(r.adot)} (${extenso(r.adot)})`);
+  P(`Valor unitário: ${brl(r.adot/r.Aa)}/m². Data de referência: ${dBR(I.data)}.`)};
+ const comerc=()=>{P(`Piso de negociação (-${fmt(r.pP,1)}%): ${brl(r.piso,0)}. Preço de anúncio sugerido (+${fmt(r.pA,1)}%): ${brl(r.anuncio,0)}.`);
+  P(`Validade: ${fmt(r.validade,0)} dias. Revisão recomendada: ${dBR(r.revisao)}.${S.com.tempo?' Tempo estimado de venda: '+S.com.tempo+'.':''}`)};
+ const assin=()=>{P(`${I.resp||'—'} - ${I.registro||'—'}`);if(I.empresa||I.telefone)P([I.empresa,I.telefone].filter(Boolean).join(' · '));P(`Local e data: ${I.cidadeEm?I.cidadeEm+', '+dBR(I.data):'____________________________'}`);P('Assinatura: ____________________________')};
+ if(pt){B.push({t:'title',s:'PARECER TÉCNICO DE AVALIAÇÃO MERCADOLÓGICA (PTAM)'});P('Método comparativo direto de dados de mercado, com base técnica na ABNT NBR 14653-1 e 14653-2 · Resolução COFECI 1.066/2007.');
+  H('1 Solicitante e objetivo');P(`Solicitante: ${I.solicitante||'—'}. Finalidade: ${I.finalidade}. Objetivo: ${I.objetivo}. Data de referência: ${dBR(I.data)}.`);
+  H('2 Identificação e caracterização do imóvel');ident();
+  H('3 Diagnóstico de mercado');diag();
+  H('4 Metodologia');metod();
+  H('5 Amostra homogeneizada');tabela();
+  H('6 Justificativa dos ajustes');just();
+  H('7 Tratamento estatístico e especificação');espec();
+  H('8 Resultado');result();comerc();
+  H('9 Ressalvas');P(`Este Parecer Técnico de Avaliação Mercadológica expressa a opinião de valor elaborada por corretor de imóveis, com base na Resolução COFECI 1.066/2007 e em pesquisa de mercado na data de referência. Não constitui laudo de avaliação de engenharia ou arquitetura. Não foram realizadas vistorias estruturais nem verificação de regularidade construtiva ou registral além dos documentos apresentados pelo solicitante. Validade de ${fmt(r.validade,0)} (${inteiro(Math.round(r.validade))}) dias, sujeita a revisão em caso de alteração das condições de mercado.`);
+  if(I.pressupostos)P('Pressupostos e fatores limitantes: '+I.pressupostos);
+  H('10 Responsável pelo parecer');assin()}
+ else{B.push({t:'title',s:'LAUDO DE AVALIAÇÃO DE IMÓVEL URBANO'});P('ABNT NBR 14653-1 e NBR 14653-2 - Método comparativo direto de dados de mercado.');
+  H('1 Solicitante e finalidade');P(`Solicitante: ${I.solicitante||'—'}. Finalidade: ${I.finalidade}. Objetivo: ${I.objetivo}. Data de referência: ${dBR(I.data)}.`);
+  H('2 Pressupostos, ressalvas e fatores limitantes');P(I.pressupostos||'Não informados.');
+  H('3 Identificação e caracterização do imóvel');ident();
+  H('4 Diagnóstico de mercado');diag();
+  H('5 Metodologia');metod();P('Justificativa dos ajustes:');just();
+  H('6 Tratamento dos dados');tabela();
+  H('7 Especificação da avaliação');espec();
+  H('8 Resultado');result();
+  H('9 Responsável técnico');assin()}
+ H('Anexos');P('Anexo A - Fichas e fotos dos dados de mercado. Anexo B - Documentação do imóvel avaliando. Anexo C - Registro fotográfico da vistoria.');
+ if(!pt&&S.com.anexo){P('Anexo D - Estratégia comercial (não integra o valor de mercado do laudo):');comerc()}
+ return B}
+const docTxt=B=>B.map(b=>b.t==='h'?'\n'+b.s.toUpperCase():b.s).join('\n');
+
+/* PDF embutido (sem biblioteca externa) */
+function lat(s){return String(s).replace(/Σ/g,'soma').replace(/Π/g,'produto').replace(/[−–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/…/g,'...').replace(/≤/g,'<=').replace(/≥/g,'>=').replace(/√/g,'raiz').replace(/[^\x00-\xFF]/g,'?')}
+let _cv;function meas(s,f,z){if(f==='F3')return s.length*0.6*z;_cv=_cv||document.createElement('canvas').getContext('2d');_cv.font=(f==='F2'?'bold ':'')+z+'px Helvetica, Arial, sans-serif';return _cv.measureText(s).width}
+function wrap(s,f,z,w){const out=[];String(s).split('\n').forEach(par=>{let ln='';par.split(' ').forEach(wd=>{const t=ln?ln+' '+wd:wd;if(meas(t,f,z)>w&&ln){out.push(ln);ln=wd}else ln=t});out.push(ln)});return out}
+function makePDF(B,rod){const W=595.28,H=841.89,M=56.69,mw=W-2*M,bot=M+14,pages=[];let ops=[],y=H-M;
+ const esc=s=>s.replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)');
+ const line=(s,f,z,lh,ul)=>{if(y-lh<bot){pages.push(ops);ops=[];y=H-M}y-=lh;ops.push(`BT /${f} ${z} Tf ${M.toFixed(2)} ${y.toFixed(2)} Td (${esc(s)}) Tj ET`);if(ul){const w=meas(s,f,z);ops.push(`0.6 w ${M.toFixed(2)} ${(y-1.8).toFixed(2)} m ${(M+w).toFixed(2)} ${(y-1.8).toFixed(2)} l S`)}};
+ B.forEach(b=>{const s=lat(b.s);if(b.t==='title'){wrap(s,'F2',13,mw).forEach(l=>line(l,'F2',13,17));y-=4}
+  else if(b.t==='h'){y-=8;wrap(s,'F2',11,mw).forEach(l=>line(l,'F2',11,15,true));y-=2}
+  else if(b.t==='b'){y-=4;wrap(s,'F2',11,mw).forEach(l=>line(l,'F2',11,15));y-=4}
+  else if(b.t==='m')line(s.slice(0,Math.floor(mw/(0.6*7.5))),'F3',7.5,10);
+  else{wrap(s,'F1',10,mw).forEach(l=>line(l,'F1',10,13.5));y-=3}});
+ pages.push(ops);const N=pages.length;
+ pages.forEach((p,i)=>{p.push(`BT /F1 8 Tf ${M} 30 Td (${esc(lat(rod))}) Tj ET`);const t=lat(`Página ${i+1} de ${N}`);p.push(`BT /F1 8 Tf ${(W-M-meas(t,'F1',8)).toFixed(2)} 30 Td (${esc(t)}) Tj ET`)});
+ const o=[];o[1]='<< /Type /Catalog /Pages 2 0 R >>';['Helvetica','Helvetica-Bold','Courier'].forEach((f,k)=>o[3+k]=`<< /Type /Font /Subtype /Type1 /BaseFont /${f} /Encoding /WinAnsiEncoding >>`);
+ const kids=[];pages.forEach((p,i)=>{const po=6+2*i,co=7+2*i,st=p.join('\n');kids.push(po+' 0 R');o[po]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents ${co} 0 R >>`;o[co]=`<< /Length ${st.length} >>\nstream\n${st}\nendstream`});
+ o[2]=`<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${N} >>`;
+ let out='%PDF-1.4\n';const off=[];for(let i=1;i<o.length;i++){off[i]=out.length;out+=`${i} 0 obj\n${o[i]}\nendobj\n`}
+ const xr=out.length;out+=`xref\n0 ${o.length}\n0000000000 65535 f \n`;for(let i=1;i<o.length;i++)out+=String(off[i]).padStart(10,'0')+' 00000 n \n';
+ out+=`trailer\n<< /Size ${o.length} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`;const u=new Uint8Array(out.length);for(let i=0;i<out.length;i++)u[i]=out.charCodeAt(i)&255;return new Blob([u],{type:'application/pdf'})}
+function baixar(blob,nome){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+async function copiar(t,msg){try{await navigator.clipboard.writeText(t);msg.textContent='Copiado.'}catch(e){const x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}x.remove();msg.textContent=ok?'Copiado.':'Não foi possível copiar automaticamente.'}setTimeout(()=>msg.textContent='',3000)}
+
+/* render */
+function render(){renderTabs();$('#main').innerHTML=[vTab1,vTab2,vTab3,vTab4,vTab5,vTab6][tab]();refresh()}
+function refresh(){const r=calc();panel(r);
+ if(tab===0){const u=$('#idUso');if(u)u.textContent=isFinite(r.idA)?fmt(r.idA,0)+' anos':'—'}
+ if(tab===1){$('#amRes').textContent=amRes(r);$('#amW').innerHTML=amW(r);r.rows.forEach(x=>{const u=$('#u'+x.i);if(u){u.textContent=fmt(x.unit);$('#h'+x.i).textContent=fmt(x.hom);$('#s'+x.i).innerHTML=chip(x.st)}})}
+ if(tab===2){$('#coefW').innerHTML=coefW(r);$('#tratLive').innerHTML=tratLive(r)}
+ if(tab===3){$('#espLive').innerHTML=espLive(r);$('#valW').innerHTML=valW(r)}
+ if(tab===4)$('#comLive').innerHTML=comLive(r);
+ if(tab===5)$('#laudoTx').value=docTxt(documento(r))}
+function onInp(e){const el=e.target,v=el.type==='checkbox'?el.checked:el.value;let hit=true;
+ if(el.id==='impTx'||el.id==='laudoTx')return;
+ if(el.dataset.k){setP(el.dataset.k,v);if(el.dataset.k==='tipo'&&e.type==='change'){save();render();return}}
+ else if(el.dataset.d){const[i,f]=el.dataset.d.split('.');S.dados[+i][f]=v}
+ else if(el.dataset.iv!==undefined)S.trat.iv[+el.dataset.iv]=v;else if(el.dataset.ic!==undefined)S.trat.ic[+el.dataset.ic]=v;else hit=false;
+ if(hit){save();refresh()}}
+document.addEventListener('input',onInp);document.addEventListener('change',onInp);
+let tNovo=null;
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.tab!==undefined){tab=+b.dataset.tab;render();return}
+ if(b.dataset.del!==undefined){S.dados.splice(+b.dataset.del,1);save();render();return}
+ switch(b.id){
+ case'bAdd':S.dados.push(novoDado());save();render();break;
+ case'bEx':S=exemplo();save();render();break;
+ case'bNovo':if(tNovo){clearTimeout(tNovo);tNovo=null;S=blank();save();tab=0;render();b.textContent='Novo estudo';b.classList.remove('danger')}else{b.textContent='Confirmar: apagar estudo atual';b.classList.add('danger');tNovo=setTimeout(()=>{tNovo=null;b.textContent='Novo estudo';b.classList.remove('danger')},4000)}break;
+ case'bPdf':{const r=calc(),d=(S.id.data||hoje()).split('-'),end=(S.id.endereco||'imovel').replace(/[\\/:*?"<>|]/g,'-').trim(),pt=S.tipo==='PTAM';
+  baixar(makePDF(documento(r),pt?'Parecer Técnico de Avaliação Mercadológica - PTAM':'Laudo de avaliação - ABNT NBR 14653'),`${pt?'PTAM':'Laudo'} - ${end} - ${d[2]}-${d[1]}-${d[0]}.pdf`);break}
+ case'bCopy':copiar($('#laudoTx').value,$('#msg5'));break;
+ case'bJson':copiar(JSON.stringify(S,null,1),$('#msgJ'));break;
+ case'bImp':try{const o=JSON.parse($('#impTx').value);if(!o||!o.id||!Array.isArray(o.dados))throw 0;S=merge(o);save();tab=0;render()}catch(_){$('#msgJ').textContent='Dados inválidos: cole o texto completo copiado por “Copiar dados do estudo”.'}break}});
+render();
+</script>
+</body>
+</html>
